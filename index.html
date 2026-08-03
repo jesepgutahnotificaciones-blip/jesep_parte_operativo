@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seleccione una de estas dependencias - Policía Nacional de Colombia ASJUR, OFSEMANA, CEPOL, GUTAH, SUSEP, SUMEC, SEPRI, PLANE, PLDEMO, OAC, COVAR, GUVIP, GUTIC,GUSEP,GURIN, GULOG, GUGET, GUGEC, GUFAC, GUDEH, GUCOE, GRUIS, ARGOP, COINT, GRUES, ARSEG. </title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --verde-policia: #01592F; --azul-oscuro: #173E56; --amarillo-policia: #C9A227;
+            --blanco: #FFFFFF; --gris-fondo: #F0F2F5; --gris-texto: #5F6368;
+            --gris-oscuro: #3C4043; --borde: #DADCE0; --rojo-error: #D93025;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh;
+            color: var(--gris-oscuro);
+            background-image: url('https://raw.githubusercontent.com/jesepgutahnotificaciones-blip/RADICADOS_JESEP/main/1-fescol-policia-abuso-cilives-1.jpg');
+            background-size: cover; background-position: center; background-attachment: fixed;
+            background-repeat: no-repeat; background-color: var(--gris-fondo);
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(1,89,47,0.85) 0%, rgba(23,62,86,0.85) 100%);
+            z-index: -1;
+        }
+        .login-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, rgba(1,89,47,0.95) 0%, rgba(23,62,86,0.95) 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 10000;
+            transition: opacity 0.5s ease;
+        }
+        .login-overlay.hidden { opacity: 0; pointer-events: none; }
+        .login-card {
+            background: var(--blanco); padding: 40px; border-radius: 16px;
+            width: 100%; max-width: 400px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;
+        }
+        .login-card img { width: 80px; margin-bottom: 20px; }
+        .login-card h2 { color: var(--verde-policia); font-size: 1.5rem; margin-bottom: 8px; }
+        .login-card .subtitle { color: var(--gris-texto); font-size: 0.9rem; margin-bottom: 30px; }
+        .login-form { display: flex; flex-direction: column; gap: 16px; }
+        .input-group { position: relative; }
+        .input-group input {
+            width: 100%; padding: 14px 16px; border: 2px solid var(--borde); border-radius: 8px;
+            font-size: 1rem; transition: all 0.3s ease; font-family: inherit;
+        }
+        .input-group input:focus { outline: none; border-color: var(--verde-policia); }
+        .input-group label {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            color: var(--gris-texto); font-size: 0.9rem; transition: all 0.3s ease;
+            pointer-events: none; background: var(--blanco); padding: 0 4px;
+        }
+        .input-group input:focus + label,
+        .input-group input:not(:placeholder-shown) + label {
+            top: 0; font-size: 0.75rem; color: var(--verde-policia);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, var(--verde-policia) 0%, var(--azul-oscuro) 100%);
+            color: var(--blanco); border: none; padding: 16px; border-radius: 8px;
+            font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s ease;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(1,89,47,0.3); }
+        .btn-login:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .btn-login-secondary {
+            background: var(--gris-texto); color: var(--blanco); border: none; padding: 14px;
+            border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+            transition: all 0.3s ease; margin-top: 10px;
+        }
+        .btn-login-secondary:hover { background: var(--gris-oscuro); }
+        .login-error { color: var(--rojo-error); font-size: 0.85rem; margin-top: 10px; display: none; }
+        .login-error.show { display: block; }
+        .spinner {
+            display: inline-block; width: 20px; height: 20px;
+            border: 3px solid rgba(255,255,255,0.3); border-top-color: var(--blanco);
+            border-radius: 50%; animation: spin 1s linear infinite; margin-left: 10px; vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .dep-name { color: var(--verde-policia); font-weight: 700; font-size: 1.1rem; }
+        .user-info { display: flex; align-items: center; gap: 12px; color: var(--blanco); font-size: 0.85rem; }
+        .user-badge {
+            background: var(--amarillo-policia); color: var(--azul-oscuro); padding: 4px 12px;
+            border-radius: 20px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase;
+        }
+        .btn-logout {
+            background: rgba(255,255,255,0.2); color: var(--blanco); border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; transition: all 0.3s ease;
+        }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+        .header-institutional {
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: white;
+            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-left img { width: 50px; }
+        .header-text h1 { font-size: 1.2rem; }
+        .subtitle { color: #C9A227; font-size: .85rem; }
+        .main-content { max-width: 1400px; margin: 25px auto; padding: 0 25px; }
+        .welcome-section {
+            background: rgba(255,255,255,.95); padding: 25px; border-radius: 12px;
+            margin-bottom: 25px; text-align: center;
+        }
+        .welcome-section h2 { color: #01592F; margin-bottom: 10px; }
+        .buttons-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; }
+        .btn-dependency {
+            background: rgba(255,255,255,.95); border: 2px solid #DADCE0; padding: 18px;
+            border-radius: 8px; cursor: pointer; transition: .3s; font-weight: 600; position: relative;
+        }
+        .btn-dependency:hover { transform: translateY(-3px); border-color: #01592F; }
+        .btn-dependency:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-dependency.hidden { display: none; }
+        .icon { display: block; font-size: 1.5rem; margin-bottom: 8px; }
+        .name { display: block; color: #01592F; font-weight: bold; }
+        .type { display: block; font-size: .75rem; color: #5F6368; margin-top: 5px; }
+        .footer-institutional {
+            text-align: center; padding: 20px; margin-top: 30px;
+            background: linear-gradient(135deg, #01592F 0%, #173E56 100%); color: white;
+        }
+        .motto { color: #C9A227; margin-top: 10px; }
+        .debug-panel {
+            position: fixed; bottom: 10px; left: 10px; right: 10px;
+            background: rgba(0,0,0,0.9); color: #0f0; padding: 10px;
+            border-radius: 8px; font-family: monospace; font-size: 12px;
+            max-height: 200px; overflow-y: auto; z-index: 99999;
+            display: none; border: 1px solid #0f0;
+        }
+        .debug-panel.show { display: block; }
+        .debug-toggle {
+            position: fixed; bottom: 10px; right: 10px; z-index: 99999;
+            background: #333; color: #0f0; border: 1px solid #0f0;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer;
+            font-family: monospace; font-size: 11px;
+        }
+        .config-panel {
+            background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px;
+            padding: 15px; margin-bottom: 15px; text-align: left; font-size: 0.85rem;
+        }
+        .config-panel input {
+            width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px;
+            font-family: monospace; font-size: 0.8rem;
+        }
+        .config-panel button {
+            background: var(--verde-policia); color: white; border: none;
+            padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 5px;
+        }
+        @media(max-width:768px) {
+            .buttons-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .login-card { padding: 30px 20px; margin: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-card" id="loginCard">
+            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
+                 alt="Escudo Policía Nacional"
+                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
+            <h2>Policía Nacional de Colombia</h2>
+            <p class="subtitle">SELECCIÓN DE DEPENDENCIA - ASJUR, OFSEMANA, CEPOL, GUTAH, SUSEP, SUMEC, SEPRI, PLANE, PLDEMO, OAC, COVAR, GUVIP, GUTIC,GUSEP, GURIN, GULOG, GUGET, GUGEC, GUFAC, GUDEH, GUCOE, GRUIS, ARGOP, COINT, GRUES, ARSEG </p>
+            
+            <!-- CONFIGURACIÓN DE URL -->
+           <!-- <div class="config-panel" id="configPanel">
+                <strong>⚙️ Configurar URL del Web App</strong><br>
+                <small>Pega aquí la URL de tu Apps Script Web App (termina en /exec)</small>
+                <input type="text" id="apiUrlInput" placeholder="https://script.google.com/macros/s/.../exec">
+                <button onclick="guardarUrl()">💾 Guardar URL</button>
+                <div id="urlStatus" style="margin-top:5px;color:#666;"></div>
+            </div>-->
+            
+            <form class="login-form" id="loginForm" onsubmit="return false;">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder=" " required autocomplete="username">
+                    <label for="username">Usuario</label>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder=" " required autocomplete="current-password">
+                    <label for="password">Contraseña</label>
+                </div>
+                <button type="submit" class="btn-login" id="btnLogin" onclick="handleLogin()">
+                    Ingresar
+                </button>
+                <div class="login-error" id="loginError"></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="header-institutional">
+        <div class="header-left">
+            <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png">
+            <div class="header-text">
+                <h1>Jefatura Nacional del Servicio de Policía</h1>
+                <p class="subtitle">Sistema de Gestión de Novedades</p>
+            </div>
+        </div>
+        <div class="user-info" id="userInfo" style="display:none;">
+            <span id="userName"></span>
+            <span class="user-badge" id="userRole"></span>
+            <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+        </div>
+        <span id="currentDate"></span>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="welcome-section">
+            <h2>🏛️ Seleccione una Dependencia</h2>
+            <p id="welcomeText">Seleccione la dependencia para gestionar el registro de novedades</p>
+        </div>
+        <div class="buttons-grid" id="buttonsContainer"></div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer-institutional">
+        <p>Sistema de Gestión de Novedades</p>
+        <p class="motto">★ DIOS Y PATRIA ★</p>
+    </div>
+
+    <!-- DEBUG PANEL -->
+    <div class="debug-panel" id="debugPanel"></div>
+    <button class="debug-toggle" onclick="toggleDebug()">🐛 DEBUG</button>
+
+    <script>
+        // ============================================================
+        // CONFIGURACIÓN API
+        // ============================================================
+        const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbwT1yzHc_cLRvny4OftqbrVFj6P40Mw_a9GngrGOGRRuAIF-vvcLihctkj__JjGAdSP/exec';
+        
+        function getApiUrl() {
+            return localStorage.getItem('policiaApiUrl') || DEFAULT_API_URL;
+        }
+        
+        let API_URL = getApiUrl();
+        
+        function guardarUrl() {
+            const url = document.getElementById('apiUrlInput').value.trim();
+            if (!url || !url.includes('/exec')) {
+                document.getElementById('urlStatus').innerHTML = '<span style="color:red">❌ URL inválida</span>';
+                return;
+            }
+            localStorage.setItem('policiaApiUrl', url);
+            API_URL = url;
+            document.getElementById('urlStatus').innerHTML = '<span style="color:green">✅ URL guardada</span>';
+            log('URL actualizada: ' + url.substring(0, 60) + '...');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const saved = localStorage.getItem('policiaApiUrl');
+            if (saved) document.getElementById('apiUrlInput').value = saved;
+        });
+
+        let tempUsuario = null;
+        let cbCounter = 0;
+
+        // ============================================================
+        // DEBUG LOGGER
+        // ============================================================
+        function log(msg, type = 'info') {
+            const panel = document.getElementById('debugPanel');
+            const time = new Date().toLocaleTimeString('es-CO');
+            const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : type === 'warn' ? '#ffaa00' : '#0f0';
+            panel.innerHTML += `<div style="color:${color}">[${time}] ${msg}</div>`;
+            panel.scrollTop = panel.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${msg}`);
+        }
+
+        function toggleDebug() {
+            document.getElementById('debugPanel').classList.toggle('show');
+        }
+
+        // ============================================================
+        // API FETCH - JSONP VIA SCRIPT TAG (GET, no POST)
+        // ============================================================
+        function apiFetch(action, params = {}) {
+            return new Promise((resolve, reject) => {
+                const id = ++cbCounter;
+                const cbName = 'cb_' + id + '_' + Date.now();
+                
+                log(`API #${id} → ${action} (GET JSONP)`);
+                
+                // Construir URL con parámetros GET
+                const url = new URL(API_URL);
+                url.searchParams.append('action', action);
+                url.searchParams.append('callback', cbName);
+                
+                for (const [key, value] of Object.entries(params)) {
+                    if (value !== undefined && value !== null) {
+                        url.searchParams.append(key, value);
+                    }
+                }
+                
+                const urlStr = url.toString();
+                log(`API #${id} → URL: ${urlStr.substring(0, 150)}...`);
+                
+                // Crear script tag para JSONP
+                const script = document.createElement('script');
+                script.type = 'text/javascript';
+                
+                // Timeout
+                const timeout = setTimeout(() => {
+                    log(`API #${id} ← TIMEOUT (15s)`, 'error');
+                    cleanup();
+                    reject(new Error('Timeout - Verifica la URL del Web App'));
+                }, 15000);
+                
+                // Callback global
+                window[cbName] = function(data) {
+                    clearTimeout(timeout);
+                    log(`API #${id} ← Respuesta OK`, 'success');
+                    log(`API #${id} ← Data: ${JSON.stringify(data).substring(0, 300)}`);
+                    cleanup();
+                    resolve(data);
+                };
+                
+                function cleanup() {
+                    delete window[cbName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+                
+                script.onerror = function() {
+                    clearTimeout(timeout);
+                    log(`API #${id} ← Error cargando script`, 'error');
+                    cleanup();
+                    reject(new Error('Error cargando script - La URL puede estar mal o el servidor no responde'));
+                };
+                
+                script.src = urlStr;
+                document.head.appendChild(script);
+            });
+        }
+
+        // ============================================================
+        // LOGIN
+        // ============================================================
+        async function handleLogin() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('btnLogin');
+            const errorDiv = document.getElementById('loginError');
+            
+            if (!username || !password) {
+                errorDiv.textContent = 'Ingrese usuario y contraseña';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Verificando... <span class="spinner"></span>';
+            errorDiv.classList.remove('show');
+            
+            log('=== LOGIN ===');
+            log(`Usuario: ${username}`);
+            log(`URL: ${API_URL.substring(0, 60)}...`);
+            
+            try {
+                const response = await apiFetch('login', {
+                    username: username,
+                    password: password
+                });
+                
+                log(`Respuesta: ${JSON.stringify(response)}`);
+                
+                if (response.success && response.usuario) {
+                    tempUsuario = response.usuario;
+                    log(`✅ Login OK - Rol: ${tempUsuario.rol}`, 'success');
+                    
+                    if (tempUsuario.rol === 'administrador') {
+                        completeLogin(tempUsuario);
+                    } else {
+                        showDepKeyPrompt(tempUsuario);
+                    }
+                } else {
+                    log(`❌ Login fallido: ${response.error || 'desconocido'}`, 'error');
+                    errorDiv.textContent = response.error || 'Usuario o contraseña incorrectos';
+                    errorDiv.classList.add('show');
+                    btn.disabled = false;
+                    btn.textContent = 'Ingresar';
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                errorDiv.textContent = 'Error de conexión. Verifica la URL del Web App.';
+                errorDiv.classList.add('show');
+                btn.disabled = false;
+                btn.textContent = 'Ingresar';
+            }
+        }
+
+        // ============================================================
+        // PROMPT CLAVE DEP
+        // ============================================================
+        function showDepKeyPrompt(usuario) {
+            log('=== CLAVE DEP ===');
+            log(`Dependencia: ${usuario.dependencia}`);
+            
+            const loginCard = document.getElementById('loginCard');
+            
+            loginCard.innerHTML = `
+                <img src="https://www.policia.gov.co/sites/default/files/escudo-policia.png" 
+                     alt="Escudo Policía Nacional"
+                     onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Coat_of_arms_of_colombian_national_police.svg/120px-Coat_of_arms_of_colombian_national_police.svg.png'">
+                <h2>Verificación de Dependencia</h2>
+                <p class="subtitle">Dependencia: <span class="dep-name">${usuario.dependencia}</span></p>
+                <p style="font-size: 0.85rem; color: var(--gris-texto); margin-bottom: 20px;">
+                    Ingrese la clave de acceso asignada a su dependencia
+                </p>
+                
+                <form class="login-form" onsubmit="return false;">
+                    <div class="input-group">
+                        <input type="password" id="depKeyInput" placeholder=" " required autocomplete="off">
+                        <label for="depKeyInput">Clave de Dependencia</label>
+                    </div>
+                    <button type="submit" class="btn-login" id="btnDepKey" onclick="verifyDepKey()">
+                        Verificar Clave
+                    </button>
+                    <button type="button" class="btn-login-secondary" onclick="backToLogin()">
+                        ← Volver al Login
+                    </button>
+                    <div class="login-error" id="depKeyError"></div>
+                </form>
+            `;
+            
+            setTimeout(() => {
+                const input = document.getElementById('depKeyInput');
+                if (input) input.focus();
+            }, 100);
+            
+            const depInput = document.getElementById('depKeyInput');
+            if (depInput) {
+                depInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') verifyDepKey();
+                });
+            }
+        }
+
+        // ============================================================
+        // VERIFICAR CLAVE
+        // ============================================================
+        async function verifyDepKey() {
+            const depKey = document.getElementById('depKeyInput').value.trim();
+            const btn = document.getElementById('btnDepKey');
+            const errorDiv = document.getElementById('depKeyError');
+            
+            if (!depKey) {
+                errorDiv.textContent = 'Ingrese la clave de dependencia';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            if (!tempUsuario) {
+                errorDiv.textContent = 'Error: Sesión perdida.';
+                errorDiv.classList.add('show');
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = 'Verificando... <span class="spinner"></span>';
+            errorDiv.classList.remove('show');
+            
+            log('=== VERIFICAR CLAVE ===');
+            log(`Dep: ${tempUsuario.dependencia}, Clave: ${depKey}`);
+            
+            try {
+                const response = await apiFetch('verifyDepKey', {
+                    username: tempUsuario.username,
+                    depKey: depKey,
+                    dependencia: tempUsuario.dependencia
+                });
+                
+                log(`Respuesta: ${JSON.stringify(response)}`);
+                
+                if (response.success) {
+                    log('✅ CLAVE CORRECTA', 'success');
+                    completeLogin(tempUsuario);
+                } else {
+                    log(`❌ ${response.error || 'Clave incorrecta'}`, 'error');
+                    errorDiv.textContent = response.error || 'Clave de dependencia incorrecta';
+                    errorDiv.classList.add('show');
+                    btn.disabled = false;
+                    btn.textContent = 'Verificar Clave';
+                }
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                errorDiv.textContent = 'Error de conexión. Intente nuevamente.';
+                errorDiv.classList.add('show');
+                btn.disabled = false;
+                btn.textContent = 'Verificar Clave';
+            }
+        }
+
+        function backToLogin() {
+            tempUsuario = null;
+            location.reload();
+        }
+
+        function completeLogin(usuario) {
+            log('=== LOGIN COMPLETADO ===', 'success');
+            const session = {
+                usuario: usuario,
+                token: usuario.token || Date.now().toString(),
+                timestamp: Date.now()
+            };
+            localStorage.setItem('policiaSession', JSON.stringify(session));
+            showDashboard(usuario);
+        }
+
+        function showDashboard(usuario) {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('userInfo').style.display = 'flex';
+            document.getElementById('userName').textContent = usuario.username;
+            document.getElementById('userRole').textContent = usuario.rol;
+            
+            const welcomeText = document.getElementById('welcomeText');
+            if (usuario.rol === 'administrador') {
+                welcomeText.textContent = 'Administrador - Acceso a todas las dependencias';
+            } else {
+                welcomeText.textContent = 'Operador - Dependencia: ' + usuario.dependencia;
+            }
+            
+            generateButtons(usuario);
+        }
+
+        function generateButtons(usuario) {
+            const dependencies = [
+                'ASJUR', 'CEPOL', 'ARSEG', 'GRUES', 'COINT', 'ARGOP', 'GRUIS',
+                'GUCOE', 'GUDEH', 'GUFAC', 'GUGEC', 'GUGED', 'GUGET', 'GULOG',
+                'GURIN', 'GUSEP', 'GUTAH', 'GUTIC', 'GUVIP', 'COVAR', 'OAC',
+                'PLAN DEMOCRACIA', 'PLANE', 'SEPRI', 'SUMEC', 'SUSEP', 'PARTE FINAL'
+            ];
+
+            const container = document.getElementById('buttonsContainer');
+            container.innerHTML = '';
+
+            dependencies.forEach(dep => {
+                if (usuario.rol === 'operador' && usuario.dependencia !== 'TODAS') {
+                    if (dep !== usuario.dependencia && dep !== 'PARTE FINAL') return;
+                }
+
+                const btn = document.createElement('button');
+                btn.className = 'btn-dependency';
+                const isUserDep = dep === usuario.dependencia;
+                if (isUserDep) {
+                    btn.style.borderColor = '#C9A227';
+                    btn.style.background = 'rgba(255,255,255,1)';
+                }
+                btn.innerHTML = `
+                    <span class="icon">🛡️</span>
+                    <span class="name">${dep}</span>
+                    <span class="type">${isUserDep ? 'Tu dependencia' : 'Dependencia'}</span>
+                `;
+                btn.onclick = () => {
+                    localStorage.setItem('currentDependency', dep);
+                    if (dep === "PARTE FINAL") {
+                        window.location.href = 'https://jesepgutahnotificaciones-blip.github.io/parte_jesep/index_main.html';
+                    } else {
+                        window.location.href = 'dashboard.html';
+                    }
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function logout() {
+            localStorage.removeItem('policiaSession');
+            localStorage.removeItem('currentDependency');
+            tempUsuario = null;
+            location.reload();
+        }
+
+        function checkSession() {
+            const sessionStr = localStorage.getItem('policiaSession');
+            if (!sessionStr) return false;
+            try {
+                const session = JSON.parse(sessionStr);
+                if (Date.now() - session.timestamp > 8 * 60 * 60 * 1000) {
+                    localStorage.removeItem('policiaSession');
+                    return false;
+                }
+                return session.usuario;
+            } catch (e) { return false; }
+        }
+
+        function init() {
+            log('=== PÁGINA CARGADA ===');
+            log(`URL: ${API_URL.substring(0, 60)}...`);
+            
+            const usuario = checkSession();
+            if (usuario) {
+                log('Sesión existente', 'success');
+                showDashboard(usuario);
+            } else {
+                log('Sin sesión');
+                document.getElementById('loginOverlay').classList.remove('hidden');
+            }
+            updateDate();
+        }
+
+        function updateDate() {
+            const now = new Date();
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('es-CO', {
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const u = document.getElementById('username');
+            const p = document.getElementById('password');
+            if (u) u.addEventListener('keypress', function(e) { if (e.key === 'Enter') p.focus(); });
+            if (p) p.addEventListener('keypress', function(e) { if (e.key === 'Enter') handleLogin(); });
+        });
+
+        init();
+    </script>
+</body>
+</html>
